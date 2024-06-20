@@ -1,6 +1,9 @@
 name: VOE Disconnect Status Daily
 
-on: [push]
+on:
+  workflow_dispatch:
+#  schedule:
+#    - cron: '0 5 * * *'
 
 jobs:
   Daily-Run:
