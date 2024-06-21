@@ -1,14 +1,13 @@
 import requests
 
-from config import Settings
+from voe.config import Settings
 
 
-settings = Settings()
-
-
-def send_telegram_message(message: str) -> None:
+def send_message(message: str, *, settings: Settings) -> None:
     """Send telegram message to a specified chat id
+
     :param message: message to send
+    :param settings: project settings
     :return: None
     :raises ValueError: if message can not be sent to the chat id
     """
@@ -22,9 +21,5 @@ def send_telegram_message(message: str) -> None:
         },
     )
     response.raise_for_status()
-    if not response.json()['ok'] is True:
-        raise ValueError('Failed to send a telegram message')
-
-
-if __name__ == '__main__':
-    send_telegram_message('Hey from *GitHub Actions*')
+    if response.json()['ok'] is not True:
+        raise ValueError(f'Failed to send a telegram message. Got response {response.status_code!r}')

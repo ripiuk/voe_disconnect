@@ -24,4 +24,7 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python main.py
+          CITY_ID: ${{ secrets.CITY_ID }}
+          STREET_ID: ${{ secrets.STREET_ID }}
+          HOUSE_ID: ${{ secrets.HOUSE_ID }}
+        run: python -m voe
