@@ -1,0 +1,30 @@
+name: VOE Disconnect Status Daily
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  Daily-Run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip' # caching pip dependencies
+      - name: Install python packages
+        run: |
+          pip install -r requirements.txt
+      - name: Send telegram message
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CITY_ID: ${{ secrets.CITY_ID }}
+          STREET_ID: ${{ secrets.STREET_ID }}
+          HOUSE_ID: ${{ secrets.HOUSE_ID }}
+        run: python -m voe
