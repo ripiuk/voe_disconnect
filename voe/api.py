@@ -1,14 +1,15 @@
 from requests import Session
 from pydantic import ValidationError
 
-from voe.config import Settings
 from voe.models import InsertCommand
 
 
-def get_response(settings: Settings) -> InsertCommand:
+def get_response(*, city_id: int, street_id: int, house_id: int) -> InsertCommand:
     """Make a VOE API request and search for needed data
 
-    :param settings: project settings
+    :param city_id: City ID to search for
+    :param street_id: Street ID to search for
+    :param house_id: House ID to search for
     :return: InsertCommand object
     """
     # TODO: add retries
@@ -35,9 +36,9 @@ def get_response(settings: Settings) -> InsertCommand:
         params={'_wrapper_format': 'drupal_ajax'},
         data={
             'search_type': '0',
-            'city_id': settings.CITY_ID,
-            'street_id': settings.STREET_ID,
-            'house_id': settings.HOUSE_ID,
+            'city_id': city_id,
+            'street_id': street_id,
+            'house_id': house_id,
             'form_id': 'disconnection_detailed_search_form',
         },
         headers={

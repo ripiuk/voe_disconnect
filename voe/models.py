@@ -11,3 +11,8 @@ class InsertCommand(BaseModel):
 class DayInfo(BaseModel):
     day: constr(min_length=1)
     disconnection_hours: list[str] = []
+
+
+class QueueInfo(BaseModel):
+    name: constr(min_length=1)
+    days: list[DayInfo]
