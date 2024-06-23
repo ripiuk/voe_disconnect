@@ -15,4 +15,5 @@ def day_info_into_telegram_markdown_v2(days_info: list[DayInfo]) -> str:
         if day_info.disconnection_hours
     )
     message = message.replace('.', r'\.').replace('-', r'\-')
-    return message
+
+    return message or 'Відключень не заплановано'
