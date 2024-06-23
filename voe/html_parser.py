@@ -3,18 +3,26 @@ from typing import Iterable
 import lxml.html as lh
 
 from voe.utils import batcher
-from voe.models import InsertCommand, DayInfo
+from voe.models import InsertCommand, DayInfo, QueueInfo
 
 
-def parse_response_data(insert_command: InsertCommand) -> list[DayInfo]:
+def parse_response_data(insert_command: InsertCommand, queue_name: str) -> QueueInfo:
     """Parse the response data and return a dictionary of the parsed data
 
     :param insert_command: The insert command to parse
+    :param queue_name: The queue name title
     :return: A dictionary of the parsed data
     """
     # TODO: handle errors
     doc = lh.fromstring(insert_command.data)
     disconnection_detailed_table = doc.find_class('disconnection-detailed-table')[0]
+
+    try:
+        queue_number: str = disconnection_detailed_table.xpath('//p')[0].text_content()
+        queue_number = queue_number.replace('черга', '').strip()
+        queue_name = f'{queue_name} ({queue_number})'
+    except (IndexError, AttributeError):
+        pass
 
     hours: list[str] = [
         hour_div.text_content()
@@ -39,7 +47,7 @@ def parse_response_data(insert_command: InsertCommand) -> list[DayInfo]:
         )
     ]
 
-    result: list[DayInfo] = [
+    days_info: list[DayInfo] = [
         DayInfo(
             day=day,
             disconnection_hours=[
@@ -50,4 +58,4 @@ def parse_response_data(insert_command: InsertCommand) -> list[DayInfo]:
         )
         for day, batch in zip(days, batcher(has_disconnection_info, batch_size=len(hours)))
     ]
-    return result
+    return QueueInfo(name=queue_name, days=days_info)
