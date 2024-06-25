@@ -1,4 +1,5 @@
 import time
+import logging
 import datetime
 from functools import wraps
 from itertools import islice
@@ -7,22 +8,40 @@ from typing import Iterable, Callable, Type
 from models import TimeRange
 
 
+logger = logging.getLogger('voe.utils')
+
+
 def batcher(iterable: Iterable, *, batch_size: int) -> Iterable[list]:
     """Splits an iterable into batches
 
     :param iterable: The iterable to split
     :param batch_size: The size of the batch
     :return: An iterable of batches
+
+    Usage example:
+        >>> list(batcher([1, 2, 3, 4, 5, 6, 7], batch_size=2))
+        [[1, 2], [3, 4], [5, 6], [7]]
     """
-    # TODO: add example to docstring
     iterator = iter(iterable)
     while batch := list(islice(iterator, batch_size)):
         yield batch
 
 
 def combine_hours(hours: list[datetime.time]) -> list[TimeRange]:
-    """Combines hours list into a time range"""
-    # TODO: add example to docstring
+    """Combines hours list into a time range
+
+    :param hours: The hours to combine
+    :return: A list of time ranges
+
+    Usage example:
+        >>> combine_hours([
+        ...     datetime.time(hour=2), datetime.time(hour=3), datetime.time(hour=4),
+        ...     datetime.time(hour=12), datetime.time(hour=13), datetime.time(hour=17),
+        ... ])
+        [TimeRange(start=datetime.time(2, 0), end=datetime.time(5, 0)),
+         TimeRange(start=datetime.time(12, 0), end=datetime.time(14, 0)),
+         TimeRange(start=datetime.time(17, 0), end=None)]
+    """
     if not hours:
         return []
 
@@ -61,7 +80,7 @@ def retry(
                 try:
                     return f(*args, **kwargs)
                 except Exception if exceptions is None else exceptions as err:
-                    print(  # TODO: replace with logging
+                    logger.error(
                         f'An error occurred while trying {f.__name__!r}. {err.__class__.__name__}: {err}. '
                         f'Attempt {_ + 1} / {max_retries}'
                     )

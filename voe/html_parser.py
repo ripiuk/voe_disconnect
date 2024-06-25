@@ -1,3 +1,4 @@
+import logging
 import datetime
 from typing import Iterable
 
@@ -5,6 +6,9 @@ import lxml.html as lh
 
 from voe.utils import batcher
 from voe.models import DayInfo
+
+
+logger = logging.getLogger('voe.html_parser')
 
 
 def parse_queue_number(html_fragment: str) -> float | None:
@@ -16,8 +20,7 @@ def parse_queue_number(html_fragment: str) -> float | None:
         queue_number = queue_number.replace('черга', '').strip()
         return float(queue_number)
     except (IndexError, AttributeError, ValueError) as err:
-        # TODO: replace with logging
-        print(f'Can not parse the queue number. {err.__class__.__name__}: {err}')
+        logger.warning(f'Can not parse the queue number. {err.__class__.__name__}: {err}')
         return None
 
 
@@ -37,6 +40,7 @@ def parse_days_info(html_fragment: str) -> list[DayInfo]:
             '//div[contains(@class, "disconnection-detailed-table-cell")][contains(@class, "head")]',
         )
     ]
+    logger.debug(f'Hours list ({len(hours)=}): {hours}')
 
     has_disconnection_info: Iterable[bool] = (
         'has_disconnection' in disconnection_div.classes
@@ -53,6 +57,7 @@ def parse_days_info(html_fragment: str) -> list[DayInfo]:
             '[contains(@class, "day_col")]',
         )
     ]
+    logger.debug(f'Days list ({len(days)=}): {days}')
 
     days_info = [
         DayInfo(

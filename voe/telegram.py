@@ -1,8 +1,13 @@
+import logging
+
 import requests
 from requests.exceptions import HTTPError, RequestException, Timeout, ConnectionError
 
 from voe.utils import retry
 from voe.config import Settings
+
+
+logger = logging.getLogger('voe.telegram')
 
 
 @retry(max_retries=3, sleep_time_sec=1, exceptions=(HTTPError, RequestException, Timeout, ConnectionError))
@@ -22,6 +27,11 @@ def send_message(message: str, *, settings: Settings) -> None:
             'parse_mode': 'MarkdownV2',
         },
     )
-    response.raise_for_status()
-    if response.json()['ok'] is not True:
-        raise ValueError(f'Failed to send a telegram message. Got response {response.status_code!r}')
+    try:
+        response.raise_for_status()
+    except HTTPError as err:
+        logger.error(f'Got bad response from telegram server: {response.status_code=}, {response.text=}')
+        raise err
+
+    if (response_data := response.json()).get('ok') is not True:
+        raise ValueError(f'Failed to send a telegram message {response_data=}')

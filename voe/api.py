@@ -1,9 +1,14 @@
+import logging
+
 from requests import Session
 from pydantic import ValidationError
 from requests.exceptions import HTTPError, RequestException, Timeout, ConnectionError
 
 from voe.utils import retry
 from voe.models import QueueInfo, VOESearchParams, InsertCommand
+
+
+logger = logging.getLogger('voe.api')
 
 
 @retry(max_retries=3, sleep_time_sec=1, exceptions=(HTTPError, RequestException, Timeout, ConnectionError))
@@ -26,6 +31,7 @@ def _initialize_session() -> Session:
             'Upgrade-Insecure-Requests': '1',
         },
     )
+    logger.info(f'HEAD response status code: {response.status_code}')
     response.raise_for_status()
     return session
 
@@ -66,6 +72,10 @@ def _get_queue_info(*, session: Session, search_params: VOESearchParams) -> Queu
             'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
         }
+    )
+    logger.info(
+        f'VOE API response status code: {response.status_code} '
+        f'(for the {search_params.title!r} queue)'
     )
     response.raise_for_status()
 
