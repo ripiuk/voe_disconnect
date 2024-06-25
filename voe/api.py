@@ -1,21 +1,22 @@
+import logging
+
 from requests import Session
 from pydantic import ValidationError
+from requests.exceptions import HTTPError, RequestException, Timeout, ConnectionError
 
-from voe.models import InsertCommand
+from voe.utils import retry
+from voe.models import QueueInfo, VOESearchParams, InsertCommand
 
 
-def get_response(*, city_id: int, street_id: int, house_id: int) -> InsertCommand:
-    """Make a VOE API request and search for needed data
+logger = logging.getLogger('voe.api')
 
-    :param city_id: City ID to search for
-    :param street_id: Street ID to search for
-    :param house_id: House ID to search for
-    :return: InsertCommand object
-    """
-    # TODO: add retries
+
+@retry(max_retries=3, sleep_time_sec=1, exceptions=(HTTPError, RequestException, Timeout, ConnectionError))
+def _initialize_session() -> Session:
+    """Initialize requests session, grab cookies"""
     session = Session()
     # HEAD requests to grab the session cookie
-    session.head(
+    response = session.head(
         url='https://www.voe.com.ua/disconnection/detailed',
         headers={
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
@@ -30,15 +31,27 @@ def get_response(*, city_id: int, street_id: int, house_id: int) -> InsertComman
             'Upgrade-Insecure-Requests': '1',
         },
     )
+    logger.info(f'HEAD response status code: {response.status_code}')
+    response.raise_for_status()
+    return session
 
+
+@retry(max_retries=4, sleep_time_sec=1, exceptions=(HTTPError, RequestException, Timeout, ConnectionError))
+def _get_queue_info(*, session: Session, search_params: VOESearchParams) -> QueueInfo:
+    """Make a VOE API request and search for needed data
+
+    :param session: Requests session
+    :param search_params: VOE search parameters
+    :return: QueueInfo object
+    """
     response = session.post(
         url='https://www.voe.com.ua/disconnection/detailed?ajax_form=1',
         params={'_wrapper_format': 'drupal_ajax'},
         data={
             'search_type': '0',
-            'city_id': city_id,
-            'street_id': street_id,
-            'house_id': house_id,
+            'city_id': search_params.city_id,
+            'street_id': search_params.street_id,
+            'house_id': search_params.house_id,
             'form_id': 'disconnection_detailed_search_form',
         },
         headers={
@@ -60,6 +73,10 @@ def get_response(*, city_id: int, street_id: int, house_id: int) -> InsertComman
             'Upgrade-Insecure-Requests': '1',
         }
     )
+    logger.info(
+        f'VOE API response status code: {response.status_code} '
+        f'(for the {search_params.title!r} queue)'
+    )
     response.raise_for_status()
 
     response_data = response.json()
@@ -68,8 +85,30 @@ def get_response(*, city_id: int, street_id: int, house_id: int) -> InsertComman
 
     for item in response_data:
         try:
-            return InsertCommand.model_validate(item)
+            insert_command = InsertCommand.model_validate(item)
+            return QueueInfo(
+                name=search_params.title,
+                raw_data=insert_command.data,
+            )
         except ValidationError:
             continue
 
     raise ValueError(f'Con not find any insert command in the response: {response_data!r}')
+
+
+def execute_all_search_params(voe_search_params: list[VOESearchParams]) -> list[QueueInfo]:
+    """Get queues info from the VOE website based on search params
+
+    :param voe_search_params: VOE search parameters
+    :return: list of QueueInfo objects
+    """
+    session = _initialize_session()
+    # TODO: use multithreading or async
+    queues_info = [
+        _get_queue_info(
+            session=session,
+            search_params=search_params,
+        )
+        for search_params in voe_search_params
+    ]
+    return queues_info

@@ -22,6 +22,7 @@ jobs:
       - name: Send telegram message
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          # TODO: use different id for develop branch
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SEARCH_PARAMS: ${{ secrets.SEARCH_PARAMS }}
         run: python -m voe

@@ -1,28 +1,38 @@
+import logging
+import datetime
 from typing import Iterable
 
 import lxml.html as lh
 
 from voe.utils import batcher
-from voe.models import InsertCommand, DayInfo, QueueInfo
+from voe.models import DayInfo
 
 
-def parse_response_data(insert_command: InsertCommand, queue_name: str) -> QueueInfo:
-    """Parse the response data and return a dictionary of the parsed data
+logger = logging.getLogger('voe.html_parser')
 
-    :param insert_command: The insert command to parse
-    :param queue_name: The queue name title
-    :return: A dictionary of the parsed data
-    """
-    # TODO: handle errors
-    doc = lh.fromstring(insert_command.data)
+
+def parse_queue_number(html_fragment: str) -> float | None:
+    """Get queue number from HTML fragment"""
+    doc = lh.fromstring(html_fragment)
     disconnection_detailed_table = doc.find_class('disconnection-detailed-table')[0]
-
     try:
         queue_number: str = disconnection_detailed_table.xpath('//p')[0].text_content()
         queue_number = queue_number.replace('черга', '').strip()
-        queue_name = f'{queue_name} ({queue_number})'
-    except (IndexError, AttributeError):
-        pass
+        return float(queue_number)
+    except (IndexError, AttributeError, ValueError) as err:
+        logger.warning(f'Can not parse the queue number. {err.__class__.__name__}: {err}')
+        return None
+
+
+def parse_days_info(html_fragment: str) -> list[DayInfo]:
+    """Parse response data and generate disconnection days info
+
+    :param html_fragment: A fragment of the HTML response
+    :return: A list of DayInfo objects
+    """
+    # TODO: handle errors
+    doc = lh.fromstring(html_fragment)
+    disconnection_detailed_table = doc.find_class('disconnection-detailed-table')[0]
 
     hours: list[str] = [
         hour_div.text_content()
@@ -30,6 +40,7 @@ def parse_response_data(insert_command: InsertCommand, queue_name: str) -> Queue
             '//div[contains(@class, "disconnection-detailed-table-cell")][contains(@class, "head")]',
         )
     ]
+    logger.debug(f'Hours list ({len(hours)=}): {hours}')
 
     has_disconnection_info: Iterable[bool] = (
         'has_disconnection' in disconnection_div.classes
@@ -46,16 +57,17 @@ def parse_response_data(insert_command: InsertCommand, queue_name: str) -> Queue
             '[contains(@class, "day_col")]',
         )
     ]
+    logger.debug(f'Days list ({len(days)=}): {days}')
 
-    days_info: list[DayInfo] = [
+    days_info = [
         DayInfo(
             day=day,
             disconnection_hours=[
-                hour
+                datetime.datetime.strptime(hour, '%H:%M').time()
                 for hour, has_disconnection in list(zip(hours, batch))
                 if has_disconnection
             ]
         )
         for day, batch in zip(days, batcher(has_disconnection_info, batch_size=len(hours)))
     ]
-    return QueueInfo(name=queue_name, days=days_info)
+    return days_info
