@@ -1,14 +1,9 @@
 from pathlib import Path
 
-from pydantic import BaseModel, constr, conint
+from pydantic import constr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
-class _VOESearchParams(BaseModel):
-    title: str
-    city_id: conint(ge=0)
-    street_id: conint(ge=0)
-    house_id: conint(ge=0)
+from voe.models import VOESearchParams
 
 
 class Settings(BaseSettings):
@@ -20,4 +15,4 @@ class Settings(BaseSettings):
     TELEGRAM_TOKEN: constr(min_length=1)
     TELEGRAM_CHAT_ID: constr(min_length=1)
 
-    SEARCH_PARAMS: list[_VOESearchParams]
+    SEARCH_PARAMS: list[VOESearchParams]
