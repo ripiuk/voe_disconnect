@@ -1,7 +1,5 @@
-from voe import telegram
 from voe.config import Settings
-
-from voe import api, html_parser, formatter
+from voe import api, html_parser, formatter, telegram
 
 
 class Application:

@@ -5,7 +5,7 @@ from functools import wraps
 from itertools import islice
 from typing import Iterable, Callable, Type
 
-from models import TimeRange
+from voe.models import TimeRange
 
 
 logger = logging.getLogger('voe.utils')
