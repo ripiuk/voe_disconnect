@@ -64,10 +64,10 @@ def parse_days_info(html_fragment: str) -> list[DayInfo]:
             day=day,
             disconnection_hours=[
                 datetime.datetime.strptime(hour, '%H:%M').time()
-                for hour, has_disconnection in list(zip(hours, batch))
+                for hour, has_disconnection in list(zip(hours, batch, strict=True))
                 if has_disconnection
             ]
         )
-        for day, batch in zip(days, batcher(has_disconnection_info, batch_size=len(hours)))
+        for day, batch in zip(days, batcher(has_disconnection_info, batch_size=len(hours)), strict=True)
     ]
     return days_info

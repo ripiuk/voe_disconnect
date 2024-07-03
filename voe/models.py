@@ -20,6 +20,9 @@ class QueueInfo(BaseModel):
     raw_data: constr(min_length=100)
     days: list[DayInfo] = []
 
+    class Config:
+        validate_assignment = True
+
 
 class VOESearchParams(BaseModel):
     title: str

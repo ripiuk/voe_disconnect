@@ -1,4 +1,5 @@
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from requests import Session
 from pydantic import ValidationError
@@ -96,19 +97,26 @@ def _get_queue_info(*, session: Session, search_params: VOESearchParams) -> Queu
     raise ValueError(f'Con not find any insert command in the response: {response_data!r}')
 
 
-def execute_all_search_params(voe_search_params: list[VOESearchParams]) -> list[QueueInfo]:
+def execute_all_search_params(
+    voe_search_params: list[VOESearchParams],
+    *,
+    max_workers_num: int = 3,
+) -> list[QueueInfo]:
     """Get queues info from the VOE website based on search params
 
     :param voe_search_params: VOE search parameters
+    :param max_workers_num: Maximum number of concurrent requests
     :return: list of QueueInfo objects
     """
     session = _initialize_session()
-    # TODO: use multithreading or async
-    queues_info = [
-        _get_queue_info(
-            session=session,
-            search_params=search_params,
+    with ThreadPoolExecutor(max_workers=max_workers_num) as executor:  # TODO: use httpx or aiohttp instead
+        queues_info = list(
+            executor.map(
+                lambda search_params: _get_queue_info(
+                    session=session,
+                    search_params=search_params
+                ),
+                voe_search_params,
+            )
         )
-        for search_params in voe_search_params
-    ]
     return queues_info

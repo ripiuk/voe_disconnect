@@ -1,7 +1,7 @@
 from pathlib import Path
 from enum import StrEnum, unique
 
-from pydantic import constr
+from pydantic import constr, conint
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from voe.models import VOESearchParams
@@ -29,4 +29,5 @@ class Settings(BaseSettings):
     TELEGRAM_TOKEN: constr(min_length=1)
     TELEGRAM_CHAT_ID: constr(min_length=1)
 
+    MAX_WORKERS_NUM: conint(ge=1) = 3
     SEARCH_PARAMS: list[VOESearchParams]

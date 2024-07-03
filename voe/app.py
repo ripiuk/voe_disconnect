@@ -9,7 +9,10 @@ class Application:
 
     def notify_in_telegram(self) -> None:
         """Notify about VOE disconnection status in telegram"""
-        queues_info = api.execute_all_search_params(voe_search_params=self.settings.SEARCH_PARAMS)
+        queues_info = api.execute_all_search_params(
+            voe_search_params=self.settings.SEARCH_PARAMS,
+            max_workers_num=self.settings.MAX_WORKERS_NUM,
+        )
         for queue_info in queues_info:
             queue_info.number = html_parser.parse_queue_number(queue_info.raw_data)
             queue_info.days = html_parser.parse_days_info(queue_info.raw_data)
