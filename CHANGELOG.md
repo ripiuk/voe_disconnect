@@ -1,3 +1,10 @@
+### [1.2.1] (2024-07-03)
+
+* Use `ThreadPoolExecutor` for VOE API requests
+* Added total hours amount label
+
+---
+
 ### [1.2.0] (2024-06-25)
 
 * Added retries for VOE API and telegram requests
@@ -29,3 +36,4 @@
 [1.0.0]:https://github.com/ripiuk/voe_disconnect/pull/1
 [1.1.0]:https://github.com/ripiuk/voe_disconnect/pull/2
 [1.2.0]:https://github.com/ripiuk/voe_disconnect/pull/4
+[1.2.1]:https://github.com/ripiuk/voe_disconnect/pull/6
