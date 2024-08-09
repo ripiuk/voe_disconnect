@@ -20,14 +20,17 @@ def _initialize_session() -> Session:
     response = session.head(
         url='https://www.voe.com.ua/disconnection/detailed',
         headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                          '(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': '*/*',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+                          '(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-US,en;q=0.9,uk-UA;q=0.8,uk;q=0.7',
+            'Priority': 'u=1, i',
             'Connection': 'keep-alive',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
             'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
         },
@@ -64,8 +67,8 @@ def _get_queue_info(*, session: Session, search_params: VOESearchParams) -> Queu
             'Origin': 'https://www.voe.com.ua',
             'Priority': 'u=1, i',
             'Referer': 'https://www.voe.com.ua/disconnection/detailed',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                          '(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+                          '(KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
             'Connection': 'keep-alive',
             'Sec-Fetch-Dest': 'document',
             'Sec-Fetch-Mode': 'navigate',
