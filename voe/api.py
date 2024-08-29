@@ -1,9 +1,10 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
+import requests
 from requests import Session
 from pydantic import ValidationError
-from requests.exceptions import HTTPError, RequestException, Timeout, ConnectionError
+from requests.exceptions import HTTPError, RequestException, Timeout, ConnectionError, ProxyError
 
 from voe.utils import retry
 from voe.models import QueueInfo, VOESearchParams, InsertCommand
@@ -12,10 +13,26 @@ from voe.models import QueueInfo, VOESearchParams, InsertCommand
 logger = logging.getLogger('voe.api')
 
 
-@retry(max_retries=3, sleep_time_sec=1, exceptions=(HTTPError, RequestException, Timeout, ConnectionError))
+def _get_proxy_info() -> dict:
+    """Get proxy info for voe requests"""
+    resp = requests.get('http://pubproxy.com/api/proxy?type=http&https=true&post=true').json()
+    ip_info = resp['data'][0]['ipPort']
+
+    return {
+        'http': ip_info,
+        'https': ip_info,
+    }
+
+
+@retry(
+    max_retries=10,
+    sleep_time_sec=1,
+    exceptions=(HTTPError, RequestException, Timeout, ConnectionError, ProxyError),
+)
 def _initialize_session() -> Session:
     """Initialize requests session, grab cookies"""
     session = Session()
+    session.proxies.update(_get_proxy_info())
     # HEAD requests to grab the session cookie
     response = session.head(
         url='https://www.voe.com.ua/disconnection/detailed',
