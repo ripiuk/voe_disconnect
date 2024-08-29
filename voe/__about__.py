@@ -11,7 +11,7 @@ __summary__ = (
 )
 __uri__ = 'https://github.com/ripiuk/voe_disconnect'
 
-__version__ = '1.2.1'
+__version__ = '1.3.0'
 
 __author__ = 'ripiuk'
 __email__ = ''
