@@ -3,7 +3,7 @@ name: VOE Disconnect Status Daily
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 19 * * *' # UTC time
+    - cron: '0 5,19 * * *' # UTC time
 
 jobs:
   Daily-Run:
