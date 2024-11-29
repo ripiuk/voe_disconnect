@@ -15,8 +15,8 @@ logger = logging.getLogger('voe.api')
 
 def _get_proxy_info() -> dict:
     """Get proxy info for voe requests"""
-    resp = requests.get('http://pubproxy.com/api/proxy?type=http&https=true&post=true').json()
-    ip_info = resp['data'][0]['ipPort']
+    resp = requests.get('https://gimmeproxy.com/api/getProxy?post=true&supportsHttps=true&protocol=http').json()
+    ip_info = resp['ipPort']
 
     return {
         'http': ip_info,
