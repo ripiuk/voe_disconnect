@@ -24,6 +24,15 @@ def parse_queue_number(html_fragment: str) -> float | None:
         return None
 
 
+def _parse_time(raw_time: str) -> datetime.time:
+    try:
+        return datetime.datetime.strptime(raw_time.split(' - ')[0], '%H').time()
+    except Exception as err:
+        logger.warning(f'Can not parse the time from {raw_time}: {err}')
+
+    return datetime.datetime.strptime(raw_time, '%H:%M').time()
+
+
 def parse_days_info(html_fragment: str) -> list[DayInfo]:
     """Parse response data and generate disconnection days info
 
@@ -63,7 +72,7 @@ def parse_days_info(html_fragment: str) -> list[DayInfo]:
         DayInfo(
             day=day,
             disconnection_hours=[
-                datetime.datetime.strptime(hour, '%H:%M').time()
+                _parse_time(raw_time=hour)
                 for hour, has_disconnection in list(zip(hours, batch, strict=True))
                 if has_disconnection
             ]

@@ -1,7 +1,7 @@
 import datetime
 from typing import Literal
 
-from pydantic import BaseModel, constr, conint
+from pydantic import BaseModel, constr, conint, Field
 
 
 class InsertCommand(BaseModel):
@@ -11,14 +11,14 @@ class InsertCommand(BaseModel):
 
 class DayInfo(BaseModel):
     day: constr(min_length=1)
-    disconnection_hours: list[datetime.time] = []
+    disconnection_hours: list[datetime.time] = Field(default_factory=list)
 
 
 class QueueInfo(BaseModel):
     name: constr(min_length=1)
     number: float | None = None
     raw_data: constr(min_length=100)
-    days: list[DayInfo] = []
+    days: list[DayInfo] = Field(default_factory=list)
 
     class Config:
         validate_assignment = True
