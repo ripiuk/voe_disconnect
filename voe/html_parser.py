@@ -77,6 +77,6 @@ def parse_days_info(html_fragment: str) -> list[DayInfo]:
                 if has_disconnection
             ]
         )
-        for day, batch in zip(days, batcher(has_disconnection_info, batch_size=len(hours)), strict=True)
+        for day, batch in zip(days, batcher(has_disconnection_info, batch_size=len(hours)))
     ]
     return days_info
