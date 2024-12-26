@@ -54,8 +54,7 @@ def parse_days_info(html_fragment: str) -> list[DayInfo]:
     has_disconnection_info: Iterable[bool] = (
         'has_disconnection' in disconnection_div.classes
         for disconnection_div in disconnection_detailed_table.xpath(
-            '//div[contains(@class, "disconnection-detailed-table-cell")]'
-            '[contains(@class, "no_disconnection") or contains(@class, "has_disconnection")]',
+            '//div[contains(@class, "hour_block")]',
         )
     )
 

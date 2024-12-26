@@ -1,3 +1,9 @@
+### [1.3.2] (2024-12-26)
+
+* Changed disconnection detailed table parsing based on the layout changes
+
+---
+
 ### [1.3.1] (2024-12-17)
 
 * Changed time parsing logic based on the layout changes
@@ -53,3 +59,4 @@
 [1.2.1]:https://github.com/ripiuk/voe_disconnect/pull/6
 [1.3.0]:https://github.com/ripiuk/voe_disconnect/pull/7
 [1.3.1]:https://github.com/ripiuk/voe_disconnect/pull/12
+[1.3.2]:https://github.com/ripiuk/voe_disconnect/pull/16
